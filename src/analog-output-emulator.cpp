@@ -4,7 +4,7 @@ AnalogOutputEmulator::AnalogOutputEmulator() {
   _cycleCount = 4;
   _cycleLengthExtension = 8;
   _queued = false;
-  _skewHIGH = true;
+  _skew = HIGH;
 }
 
 void AnalogOutputEmulator::SetVoltage(uint8_t pin, uint8_t value) {
@@ -26,15 +26,16 @@ void AnalogOutputEmulator::SetCycleLengthExtension(uint16_t cycleLengthExtension
   _mutex.unlock();
 }
 
-void AnalogOutputEmulator::SetSkew(bool skewHIGH) {
+void AnalogOutputEmulator::SetSkew(bool skew) {
   _mutex.lock();
-  _skewHIGH = skewHIGH;
+  _skew = skew;
   _mutex.unlock();
 }
 
 void AnalogOutputEmulator::Run() {
   _mutex.lock();
 
+  // push queued changes to main _analogPins map
   if (_queued) {
     uint8_t pin;
     uint8_t value;
@@ -56,18 +57,24 @@ void AnalogOutputEmulator::Run() {
     _queued = false;
   }
   
+  // ensures these values do not change the pwm signal mid-period
+  int cycleCount = _cycleCount;
+  int cycleLengthExtension = _cycleLengthExtension;
+  bool skew = _skew;
+
   _mutex.unlock();
 
-  // skewed up (default, usually closer to accurate)
-  if (_skewHIGH) {
-    for (int cycle = 0; cycle < _cycleCount; cycle++) {
+  // skewed HIGH (default, usually closer to accurate)
+  if (_skew) {
+    for (int cycle = 0; cycle < cycleCount; cycle++) {
 
-      // run i-- pulse loop
+      // i-- pulse loop
       for (int i = 254; i >= 0; i--) {
           
         for (auto iter = _analogPins.begin(); iter != _analogPins.end(); iter++) {
           uint8_t pin = iter->first;
           uint8_t value = iter->second;
+          // ends on HIGH, as any value > 0 will be > i when i = 0
           if (value > i) {
             digitalWrite(pin, HIGH);
           }
@@ -76,33 +83,34 @@ void AnalogOutputEmulator::Run() {
           }
         }
 
-        delayMicroseconds(_cycleLengthExtension);
+        delayMicroseconds(cycleLengthExtension);
       }
     }
   }
 
-  // skewed down (non-default, less likely to be correct voltage)
+  // skewed LOW (non-default, less likely to be correct voltage)
   else {
-    for (int cycle = 0; cycle < _cycleCount; cycle++) {
+    for (int cycle = 0; cycle < cycleCount; cycle++) {
 
-      // run i++ pulse loop
+      // i++ pulse loop
       for (int i = 0; i < 255; i++) {
 
         for (auto iter = _analogPins.begin(); iter != _analogPins.end(); iter++) {
           uint8_t pin = iter->first;
           uint8_t value = iter->second;
+          // ends on LOW, as any value < 255 will be <= i when i = 254
           if (value > i) {
             digitalWrite(pin, HIGH);
           }
           else {
             digitalWrite(pin, LOW);
           }
-        }//*/
+        }
 
-        delayMicroseconds(_cycleLengthExtension);
+        delayMicroseconds(cycleLengthExtension);
       }
     }
-  }//*/
+  }
 }
 
 void AnalogOutputEmulator::RunLoop() {
