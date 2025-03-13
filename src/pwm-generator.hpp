@@ -3,10 +3,10 @@
 #include <map>
 #include <mutex>
 
-// keeps a list of pins and their analog voltages as a fraction of output
+// keeps a list of pins and their duty values to output analog voltages
 // this should be ran on its own as much as possible, as it is timing sensitive
 // recommended to Run() alone in loop() or RunLoop() pinned to its own core (1 on esp32), and have (nearly) everything else run on a separate core
-class AnalogOutputEmulator {
+class PWMGenerator {
 
   // list of pins and their duty value out of 255
   // pin number, voltage value
@@ -35,7 +35,7 @@ class AnalogOutputEmulator {
 
 public:
 
-  AnalogOutputEmulator();
+  PWMGenerator();
 
   // Settings
 

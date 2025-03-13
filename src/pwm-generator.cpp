@@ -1,38 +1,38 @@
-#include "analog-output-emulator.hpp"
+#include "pwm-generator.hpp"
 
-AnalogOutputEmulator::AnalogOutputEmulator() {
+PWMGenerator::PWMGenerator() {
   _cycleCount = 4;
   _cycleLengthExtension = 8;
   _queued = false;
   _skew = HIGH;
 }
 
-void AnalogOutputEmulator::SetVoltage(uint8_t pin, uint8_t value) {
+void PWMGenerator::SetVoltage(uint8_t pin, uint8_t value) {
   _mutex.lock();
   _insertionQueue.emplace(pin, value);
   _queued = true;
   _mutex.unlock();
 }
 
-void AnalogOutputEmulator::SetCycleCount(uint16_t cycleCount) {
+void PWMGenerator::SetCycleCount(uint16_t cycleCount) {
   _mutex.lock();
   _cycleCount = cycleCount;
   _mutex.unlock();
 }
 
-void AnalogOutputEmulator::SetCycleLengthExtension(uint16_t cycleLengthExtension) {
+void PWMGenerator::SetCycleLengthExtension(uint16_t cycleLengthExtension) {
   _mutex.lock();
   _cycleLengthExtension = cycleLengthExtension;
   _mutex.unlock();
 }
 
-void AnalogOutputEmulator::SetSkew(bool skew) {
+void PWMGenerator::SetSkew(bool skew) {
   _mutex.lock();
   _skew = skew;
   _mutex.unlock();
 }
 
-void AnalogOutputEmulator::Run() {
+void PWMGenerator::Run() {
   _mutex.lock();
 
   // push queued changes to main _analogPins map
@@ -113,7 +113,7 @@ void AnalogOutputEmulator::Run() {
   }
 }
 
-void AnalogOutputEmulator::RunLoop() {
+void PWMGenerator::RunLoop() {
   while (true) {
     Run();
   }
