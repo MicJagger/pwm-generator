@@ -26,6 +26,7 @@ void setup() {
 
   pwmg.SetCycleCount(4); // default value
   pwmg.SetCycleLengthExtension(8); // default value
+  pwmg.SetMaxDutyValue(255); // default value
   pwmg.SetSkew(LOW); // default value
 
   xTaskCreatePinnedToCore(PWMTask, "PWMTask", 10000, NULL, 1, &pwmTask, 1);

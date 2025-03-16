@@ -3,11 +3,12 @@
 PWMGenerator::PWMGenerator() {
   _cycleCount = 4;
   _cycleLengthExtension = 8;
+  _maxDutyValue = 255;
   _queued = false;
   _skew = LOW;
 }
 
-void PWMGenerator::SetVoltage(uint8_t pin, uint8_t value) {
+void PWMGenerator::SetVoltage(uint8_t pin, uint16_t value) {
   _mutex.lock();
   _insertionQueue.emplace(pin, value);
   _queued = true;
@@ -26,6 +27,12 @@ void PWMGenerator::SetCycleLengthExtension(uint16_t cycleLengthExtension) {
   _mutex.unlock();
 }
 
+void PWMGenerator::SetMaxDutyValue(uint16_t maxDutyValue) {
+  _mutex.lock();
+  _maxDutyValue = maxDutyValue;
+  _mutex.unlock();
+}
+
 void PWMGenerator::SetSkew(bool skew) {
   _mutex.lock();
   _skew = skew;
@@ -38,7 +45,7 @@ void PWMGenerator::Run() {
   // push queued changes to main _analogPins map
   if (_queued) {
     uint8_t pin;
-    uint8_t value;
+    uint16_t value;
     for (auto iter = _insertionQueue.begin(); iter != _insertionQueue.end(); iter++) {
       pin = iter->first;
       value = iter->second;
@@ -60,6 +67,7 @@ void PWMGenerator::Run() {
   // ensures these values do not change the pwm signal mid-period
   int cycleCount = _cycleCount;
   int cycleLengthExtension = _cycleLengthExtension;
+  int maxDutyValue = _maxDutyValue;
   bool skew = _skew;
 
   _mutex.unlock();
@@ -69,11 +77,11 @@ void PWMGenerator::Run() {
     for (int cycle = 0; cycle < cycleCount; cycle++) {
 
       // i-- pulse loop
-      for (int i = 254; i >= 0; i--) {
-          
+      for (int i = maxDutyValue - 1; i >= 0; i--) {
+        
         for (auto iter = _analogPins.begin(); iter != _analogPins.end(); iter++) {
           uint8_t pin = iter->first;
-          uint8_t value = iter->second;
+          uint16_t value = iter->second;
           // ends on HIGH, as any value > 0 will be > i when i = 0
           if (value > i) {
             digitalWrite(pin, HIGH);
@@ -93,12 +101,12 @@ void PWMGenerator::Run() {
     for (int cycle = 0; cycle < cycleCount; cycle++) {
 
       // i++ pulse loop
-      for (int i = 0; i < 255; i++) {
+      for (int i = 0; i < maxDutyValue; i++) {
 
         for (auto iter = _analogPins.begin(); iter != _analogPins.end(); iter++) {
           uint8_t pin = iter->first;
-          uint8_t value = iter->second;
-          // ends on LOW, as any value < 255 will be <= i when i = 254
+          uint16_t value = iter->second;
+          // ends on LOW, as any value < maxDutyValue will be <= i when i = maxDutyValue - 1
           if (value > i) {
             digitalWrite(pin, HIGH);
           }
