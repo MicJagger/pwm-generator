@@ -36,7 +36,7 @@ WIP (I don't use it, will fill in later)
 
 # Documentation
 
-This section is up to date to version 2.0.0.
+This section is up to date to version 2.0.1.
 
 ## Explanation
 
