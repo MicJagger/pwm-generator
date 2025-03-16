@@ -58,7 +58,7 @@ Whenever the processor finishes a cycle of pulses, there will always be some amo
 
 Let's say that your overall pulse cycle takes 100 milliseconds, and you have 10 milliseconds of other work to do (reading inputs, etc).
 
-![](content/looping-issue.png)
+![](content/looping-issue.PNG)
 
 ### Then there are some skewing issues.
 
