@@ -30,7 +30,7 @@ class PWMGenerator {
   uint16_t _cycleLengthExtension;
 
   // determines resting values between pulse periods
-  // default = HIGH
+  // default = LOW
   bool _skew;
 
 public:
@@ -66,7 +66,7 @@ public:
   // in situations with other functions running on the same loop, skew will affect the direction the voltage leans from where it expects
   // if cycleCount is set to 0, all pins will reflect this value (unless they are 0 or 255)
   // 
-  // default = HIGH
+  // default = LOW
   void SetSkew(bool skew);
 
 

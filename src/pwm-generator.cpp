@@ -4,7 +4,7 @@ PWMGenerator::PWMGenerator() {
   _cycleCount = 4;
   _cycleLengthExtension = 8;
   _queued = false;
-  _skew = HIGH;
+  _skew = LOW;
 }
 
 void PWMGenerator::SetVoltage(uint8_t pin, uint8_t value) {
@@ -64,7 +64,7 @@ void PWMGenerator::Run() {
 
   _mutex.unlock();
 
-  // skewed HIGH (default, usually closer to accurate)
+  // skewed HIGH (non-default, usually closer to accurate, but really bad at low voltages when there is variable gap time)
   if (_skew) {
     for (int cycle = 0; cycle < cycleCount; cycle++) {
 
@@ -88,7 +88,7 @@ void PWMGenerator::Run() {
     }
   }
 
-  // skewed LOW (non-default, less likely to be correct voltage)
+  // skewed LOW (default, usually slightly less accurate, but doesn't have as big of skew issues at the extremes)
   else {
     for (int cycle = 0; cycle < cycleCount; cycle++) {
 

@@ -106,7 +106,7 @@ I have done lots of experimentation, and found that on my ESP32 with the Run() f
 
 ``cycleLengthExtension = 8``, and 
 
-``skew = HIGH``.
+``skew = LOW``.
 
 As such, these are the defaults.
 
@@ -152,7 +152,7 @@ default = 8 (microseconds)
 
 Changes the [aforementioned and depicted skew value](#then-there-are-some-skewing-issues), which is the value that is held inbetween pulsing periods.
 
-default = HIGH
+default = LOW
 
 ### void Run()
 
