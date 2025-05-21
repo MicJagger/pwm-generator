@@ -8,8 +8,8 @@ TaskHandle_t pwmTask;
 
 PWMGenerator pwmg;
 
-void PWMTask(void* parameter);
 void Main(void* parameter);
+void PWMTask(void* parameter);
 
 
 //
@@ -29,6 +29,7 @@ void setup() {
   pwmg.SetMaxDutyValue(255); // default value
   pwmg.SetSkew(LOW); // default value
 
+  // pinning this to core 0 WILL CRASH an ESP32
   xTaskCreatePinnedToCore(PWMTask, "PWMTask", 10000, NULL, 1, &pwmTask, 1);
   delay(50);
 
