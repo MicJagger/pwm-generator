@@ -36,7 +36,7 @@ WIP (I don't use it, will fill in later)
 
 # Documentation
 
-This section is up to date to version 2.0.1.
+This section is up to date to version 2.1.0.
 
 ## Explanation
 
@@ -116,11 +116,11 @@ If you are also trying to run a low voltage with HIGH skew, that is easily the m
 
 ## Functions
 
-### void SetVoltage(uint8_t pin, uint8_t value);
+### void SetVoltage(uint8_t pin, uint16_t value);
 
-Takes in the pin number and the duty value you would like to use. Currently, duty value is out of 255, with 0 being 0 V and 255 being reference voltage (3.3V).
+Takes in the pin number and the duty value you would like to use. This operates as a fraction of the max duty value, with 0 being 0 V and maxDutyValue being reference voltage (usually ~3.3V).
 
-For example, ``SetVoltage(18, 127)`` would make something similar to this (using 1 for all other settings):
+For example, ``SetVoltage(18, 127)`` would make something similar to this (using default max duty value and 1 for the cycle settings):
 
 ![](content/example-SetVoltage.png)
 
@@ -136,7 +136,7 @@ default = 4 (cycles)
 
 ### void SetCycleLengthExtension(uint16_t cycleLengthExtension);
 
-Adds a pulse length extension of n microseconds (will likely refactor to SetPulseLengthExtension soon).
+Adds a pulse length extension of n microseconds (will possibly refactor to SetPulseLengthExtension).
 
 Not recommended to set to 0.
 
@@ -148,6 +148,14 @@ Taking the example from SetVoltage, if we doubled the value of cycleLengthExtens
 
 default = 8 (microseconds)
 
+### void SetMaxDutyValue(uint16_t maxDutyValue)
+
+Sets the number of voltage levels, allowing variable precision in voltage settings.
+
+For example, SetVoltage of value 30 with SetMaxDutyValue(120) means voltage is 30/120 * Vref (or Vref / 4).
+
+default = 255 (levels)
+
 ### void SetSkew(bool skew);
 
 Changes the [aforementioned and depicted skew value](#then-there-are-some-skewing-issues), which is the value that is held inbetween pulsing periods.
@@ -156,7 +164,7 @@ default = LOW
 
 ### void Run()
 
-The main function, pulses the signals. Run this in loop() by itself, or pin RunLoop() to its own core.
+The main function, which pulses the signals. Run this in loop() by itself, or pin RunLoop() to its own core.
 
 First adds the insertionQueue to the analogPins structure, then enables and disables them in tandem for some amount of time dependent on pin count, cycleCount, and cycleLengthExtension.
 
@@ -164,7 +172,7 @@ Depending on skew, either starts pins LOW and ends HIGH, or starts pins HIGH and
 
 ### void RunLoop()
 
-Is just Run() inside a while loop.
+This is just Run() inside a while loop.
 
 CAUTION: THIS DOES NOT TERMINATE ITSELF.
 
@@ -184,9 +192,9 @@ Depending on your microcontroller and your OS, this may vary for you, and it may
 
 If the device is plugged into your computer and hooked up to the Serial output, I have noticed the device ceasing to apply voltages correctly if close VSCode. Disconnecting and reconnecting fixes this issue.
 
-### Setting cycleCount and/or cycleLengthExtension too high
+### Setting cycleCount, cycleLengthExtension, and/or maxDutyValue too high
 
-Since both of these increase the length of time Run() is running for, it can have numerous unexpected consequences in your code
+Since all of these increase the length of time Run() is running for, it can have numerous unexpected consequences in your code
 
 It could trigger watchdog timer, or make something else time-sensitive not get to function
 
